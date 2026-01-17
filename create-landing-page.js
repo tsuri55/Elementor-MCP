@@ -1,0 +1,657 @@
+// Script to create a CloudStore landing page on WordPress with Elementor
+const dotenv = require('dotenv');
+const path = require('path');
+const { initializeApiClient } = require('./src/auth');
+const { createPage } = require('./src/wp-api');
+
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+// Build Elementor data structure
+function buildElementorData() {
+    return [
+        // Hero Section
+        {
+            "id": "hero-section",
+            "elType": "section",
+            "settings": {
+                "background_background": "gradient",
+                "background_color": "#667eea",
+                "background_color_b": "#764ba2",
+                "background_gradient_angle": {"unit": "deg", "size": 135},
+                "padding": {"unit": "px", "top": "120", "right": "20", "bottom": "80", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "hero-column",
+                    "elType": "column",
+                    "settings": {"_column_size": 100},
+                    "elements": [
+                        {
+                            "id": "hero-heading",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "פתרונות אחסון ושרתים מתקדמים",
+                                "align": "center",
+                                "title_color": "#ffffff",
+                                "typography_font_size": {"unit": "px", "size": 48},
+                                "typography_font_weight": "bold"
+                            }
+                        },
+                        {
+                            "id": "hero-text",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p style='text-align: center; font-size: 20px; color: rgba(255,255,255,0.95);'>אחסון נתונים מאובטח, מהיר ואמין עם זמינות של 99.99%. נהל את העסק שלך בביטחון מלא</p>"
+                            }
+                        },
+                        {
+                            "id": "hero-buttons",
+                            "elType": "widget",
+                            "widgetType": "button",
+                            "settings": {
+                                "text": "התחל ניסיון חינם",
+                                "align": "center",
+                                "button_type": "default",
+                                "size": "lg",
+                                "button_background_color": "#ffffff",
+                                "button_text_color": "#2563eb",
+                                "typography_font_weight": "600",
+                                "border_radius": {"unit": "px", "size": 10}
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Stats Section
+        {
+            "id": "stats-section",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#0f172a",
+                "padding": {"unit": "px", "top": "60", "right": "20", "bottom": "60", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "stats-col-1",
+                    "elType": "column",
+                    "settings": {"_column_size": 25},
+                    "elements": [
+                        {
+                            "id": "stat-1",
+                            "elType": "widget",
+                            "widgetType": "counter",
+                            "settings": {
+                                "ending_number": 99.99,
+                                "title": "זמינות שרתים",
+                                "suffix": "%",
+                                "title_color": "rgba(255,255,255,0.8)",
+                                "number_color": "#3b82f6",
+                                "duration": 2000
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "stats-col-2",
+                    "elType": "column",
+                    "settings": {"_column_size": 25},
+                    "elements": [
+                        {
+                            "id": "stat-2",
+                            "elType": "widget",
+                            "widgetType": "counter",
+                            "settings": {
+                                "ending_number": 10000,
+                                "title": "לקוחות מרוצים",
+                                "suffix": "+",
+                                "title_color": "rgba(255,255,255,0.8)",
+                                "number_color": "#3b82f6"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "stats-col-3",
+                    "elType": "column",
+                    "settings": {"_column_size": 25},
+                    "elements": [
+                        {
+                            "id": "stat-3",
+                            "elType": "widget",
+                            "widgetType": "counter",
+                            "settings": {
+                                "ending_number": 5,
+                                "title": "נתונים מאוחסנים",
+                                "suffix": "PB+",
+                                "title_color": "rgba(255,255,255,0.8)",
+                                "number_color": "#3b82f6"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "stats-col-4",
+                    "elType": "column",
+                    "settings": {"_column_size": 25},
+                    "elements": [
+                        {
+                            "id": "stat-4",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "24/7<br><span style='font-size: 18px; opacity: 0.8;'>תמיכה טכנית</span>",
+                                "align": "center",
+                                "title_color": "#3b82f6",
+                                "typography_font_size": {"unit": "px", "size": 48}
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Features Section Header
+        {
+            "id": "features-header",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#f8fafc",
+                "padding": {"unit": "px", "top": "80", "right": "20", "bottom": "20", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "features-header-col",
+                    "elType": "column",
+                    "settings": {"_column_size": 100},
+                    "elements": [
+                        {
+                            "id": "features-title",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "למה לבחור בנו?",
+                                "align": "center",
+                                "typography_font_size": {"unit": "px", "size": 40}
+                            }
+                        },
+                        {
+                            "id": "features-subtitle",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p style='text-align: center; font-size: 20px; color: #64748b;'>פתרונות מתקדמים שיעניקו לעסק שלך יתרון תחרותי</p>"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Features Row 1
+        {
+            "id": "features-row-1",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#f8fafc",
+                "padding": {"unit": "px", "top": "20", "right": "20", "bottom": "20", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "feature-col-1",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-1",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-lock"},
+                                "title_text": "אבטחה מקסימלית",
+                                "description_text": "הצפנה מקצה לקצה, גיבויים אוטומטיים והגנת DDoS מתקדמת לשמירה על הנתונים שלך בבטחון מוחלט",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb",
+                                "title_color": "#1e293b"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "feature-col-2",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-2",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-bolt"},
+                                "title_text": "ביצועים מרשימים",
+                                "description_text": "שרתי SSD מהירים במיוחד עם CDN גלובלי להבטחת זמני טעינה מינימליים בכל רחבי העולם",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "feature-col-3",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-3",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-chart-line"},
+                                "title_text": "מדרגיות גמישה",
+                                "description_text": "התאם את משאבי השרת שלך בקלות בהתאם לצרכים המשתנים של העסק ללא השבתות או עיכובים",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Features Row 2
+        {
+            "id": "features-row-2",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#f8fafc",
+                "padding": {"unit": "px", "top": "20", "right": "20", "bottom": "80", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "feature-col-4",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-4",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-globe"},
+                                "title_text": "כיסוי עולמי",
+                                "description_text": "מרכזי נתונים ב-15 מדינות להבטחת חוויית משתמש מהירה ואמינה בכל מקום",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "feature-col-5",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-5",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-dollar-sign"},
+                                "title_text": "תמחור שקוף",
+                                "description_text": "ללא עלויות נסתרות - תשלם רק על מה שאתה משתמש בו עם אפשרות לשדרג או לשנמך בכל עת",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "feature-col-6",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "feature-icon-6",
+                            "elType": "widget",
+                            "widgetType": "icon-box",
+                            "settings": {
+                                "icon": {"value": "fas fa-cog"},
+                                "title_text": "ניהול קל ופשוט",
+                                "description_text": "ממשק ניהול אינטואיטיבי עם API מלא לאוטומציה והשתלבות מושלמת עם הכלים שלך",
+                                "position": "top",
+                                "icon_primary_color": "#ffffff",
+                                "icon_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Pricing Section Header
+        {
+            "id": "pricing-header",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#f8fafc",
+                "padding": {"unit": "px", "top": "80", "right": "20", "bottom": "40", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "pricing-header-col",
+                    "elType": "column",
+                    "settings": {"_column_size": 100},
+                    "elements": [
+                        {
+                            "id": "pricing-title",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "תוכניות מחירים",
+                                "align": "center",
+                                "typography_font_size": {"unit": "px", "size": 40}
+                            }
+                        },
+                        {
+                            "id": "pricing-subtitle",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p style='text-align: center; font-size: 20px; color: #64748b;'>בחר את התוכנית המתאימה לך - ניתן לשדרג בכל עת</p>"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Pricing Cards
+        {
+            "id": "pricing-cards",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#f8fafc",
+                "padding": {"unit": "px", "top": "20", "right": "20", "bottom": "80", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "pricing-col-1",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "pricing-card-1",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "בסיס",
+                                "align": "center",
+                                "typography_font_size": {"unit": "px", "size": 24}
+                            }
+                        },
+                        {
+                            "id": "pricing-price-1",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "₪99<br><span style='font-size: 16px; color: #64748b;'>לחודש</span>",
+                                "align": "center",
+                                "title_color": "#2563eb",
+                                "typography_font_size": {"unit": "px", "size": 48}
+                            }
+                        },
+                        {
+                            "id": "pricing-features-1",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<ul style='text-align: right; line-height: 2;'><li>✓ 100GB אחסון</li><li>✓ 2 ליבות CPU</li><li>✓ 4GB RAM</li><li>✓ רוחב פס ללא הגבלה</li><li>✓ תמיכה בדוא\"ל</li><li>✓ גיבוי שבועי</li></ul>"
+                            }
+                        },
+                        {
+                            "id": "pricing-btn-1",
+                            "elType": "widget",
+                            "widgetType": "button",
+                            "settings": {
+                                "text": "התחל עכשיו",
+                                "align": "center",
+                                "button_background_color": "#2563eb",
+                                "button_text_color": "#ffffff"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "pricing-col-2",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "pricing-badge",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p style='text-align: center; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 10px; border-radius: 20px; font-weight: bold;'>מומלץ</p>"
+                            }
+                        },
+                        {
+                            "id": "pricing-card-2",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "מקצועי",
+                                "align": "center",
+                                "typography_font_size": {"unit": "px", "size": 24}
+                            }
+                        },
+                        {
+                            "id": "pricing-price-2",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "₪299<br><span style='font-size: 16px; color: #64748b;'>לחודש</span>",
+                                "align": "center",
+                                "title_color": "#2563eb",
+                                "typography_font_size": {"unit": "px", "size": 48}
+                            }
+                        },
+                        {
+                            "id": "pricing-features-2",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<ul style='text-align: right; line-height: 2;'><li>✓ 500GB אחסון</li><li>✓ 4 ליבות CPU</li><li>✓ 16GB RAM</li><li>✓ רוחב פס ללא הגבלה</li><li>✓ תמיכה 24/7</li><li>✓ גיבוי יומי</li><li>✓ SSL חינם</li><li>✓ CDN מהיר</li></ul>"
+                            }
+                        },
+                        {
+                            "id": "pricing-btn-2",
+                            "elType": "widget",
+                            "widgetType": "button",
+                            "settings": {
+                                "text": "התחל עכשיו",
+                                "align": "center",
+                                "button_background_color": "#2563eb",
+                                "button_text_color": "#ffffff"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "pricing-col-3",
+                    "elType": "column",
+                    "settings": {"_column_size": 33},
+                    "elements": [
+                        {
+                            "id": "pricing-card-3",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "ארגוני",
+                                "align": "center",
+                                "typography_font_size": {"unit": "px", "size": 24}
+                            }
+                        },
+                        {
+                            "id": "pricing-price-3",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "₪999<br><span style='font-size: 16px; color: #64748b;'>לחודש</span>",
+                                "align": "center",
+                                "title_color": "#2563eb",
+                                "typography_font_size": {"unit": "px", "size": 48}
+                            }
+                        },
+                        {
+                            "id": "pricing-features-3",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<ul style='text-align: right; line-height: 2;'><li>✓ 2TB אחסון</li><li>✓ 8 ליבות CPU</li><li>✓ 64GB RAM</li><li>✓ רוחב פס ללא הגבלה</li><li>✓ תמיכה מועדפת 24/7</li><li>✓ גיבוי בזמן אמת</li><li>✓ SSL חינם</li><li>✓ CDN פרימיום</li><li>✓ מנהל חשבון ייעודי</li></ul>"
+                            }
+                        },
+                        {
+                            "id": "pricing-btn-3",
+                            "elType": "widget",
+                            "widgetType": "button",
+                            "settings": {
+                                "text": "התחל עכשיו",
+                                "align": "center",
+                                "button_background_color": "#2563eb",
+                                "button_text_color": "#ffffff"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Contact Section
+        {
+            "id": "contact-section",
+            "elType": "section",
+            "settings": {
+                "background_background": "classic",
+                "background_color": "#0f172a",
+                "padding": {"unit": "px", "top": "80", "right": "20", "bottom": "80", "left": "20"}
+            },
+            "elements": [
+                {
+                    "id": "contact-col",
+                    "elType": "column",
+                    "settings": {"_column_size": 100},
+                    "elements": [
+                        {
+                            "id": "contact-title",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "צור קשר",
+                                "align": "center",
+                                "title_color": "#ffffff",
+                                "typography_font_size": {"unit": "px", "size": 40}
+                            }
+                        },
+                        {
+                            "id": "contact-subtitle",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p style='text-align: center; font-size: 20px; color: rgba(255,255,255,0.8);'>יש לך שאלות? נשמח לעזור!</p>"
+                            }
+                        },
+                        {
+                            "id": "contact-form",
+                            "elType": "widget",
+                            "widgetType": "form",
+                            "settings": {
+                                "form_fields": [
+                                    {
+                                        "field_type": "text",
+                                        "field_label": "שם מלא",
+                                        "required": "true"
+                                    },
+                                    {
+                                        "field_type": "email",
+                                        "field_label": "דוא\"ל",
+                                        "required": "true"
+                                    },
+                                    {
+                                        "field_type": "tel",
+                                        "field_label": "טלפון"
+                                    },
+                                    {
+                                        "field_type": "textarea",
+                                        "field_label": "הודעה",
+                                        "required": "true"
+                                    }
+                                ],
+                                "button_text": "שלח הודעה",
+                                "button_background_color": "#2563eb"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ];
+}
+
+async function createLandingPage() {
+    try {
+        console.log("Initializing WordPress API client...");
+        await initializeApiClient();
+        console.log("✓ Connected to WordPress successfully!");
+
+        console.log("\nBuilding Elementor data structure...");
+        const elementorData = buildElementorData();
+        console.log("✓ Elementor structure created!");
+
+        console.log("\nCreating page on WordPress...");
+        const pageData = {
+            title: "CloudStore - פתרונות אחסון ושרתים",
+            status: "publish",
+            content: "דף זה נבנה עם Elementor",
+            elementor_data: JSON.stringify(elementorData)
+        };
+
+        const result = await createPage(pageData);
+
+        console.log("\n✅ SUCCESS! Landing page created!");
+        console.log(`📄 Page ID: ${result}`);
+        console.log(`🔗 View your page at: ${process.env.WP_URL}?page_id=${result}`);
+        console.log(`✏️  Edit with Elementor: ${process.env.WP_URL}wp-admin/post.php?post=${result}&action=elementor`);
+
+    } catch (error) {
+        console.error("\n❌ Error creating landing page:", error.message);
+        console.error("Full error:", error);
+        if (error.response) {
+            console.error("Response Status:", error.response.status);
+            console.error("Response Headers:", error.response.headers);
+            console.error("Response Data:", JSON.stringify(error.response.data, null, 2));
+        }
+        if (error.config) {
+            console.error("Request URL:", error.config.url);
+            console.error("Request Method:", error.config.method);
+        }
+        process.exit(1);
+    }
+}
+
+// Run the script
+createLandingPage();
